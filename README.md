@@ -38,8 +38,6 @@ The focus of this project is problem solving and solution design rather than adh
 
 ---
 
----
-
 ## Internship Cohorts
 
 This repository supports student projects from two internship programs participating in the OnRamps AI Lab 2026 experience.
