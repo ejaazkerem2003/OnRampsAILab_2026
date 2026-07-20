@@ -1,0 +1,290 @@
+kind: BotDefinition
+components:
+  - kind: DialogComponent
+    version: 2575166
+    managedProperties:
+      kind: ManagedProperties
+      isCustomizable: false
+      solutionId: fd140aae-4df4-11dd-bd17-0019b9312238
+    auditInfo:
+      kind: AuditInfo
+      createdTimeUtc: 2026-07-18T00:32:04Z
+      modifiedTimeUtc: 2026-07-20T17:27:22Z
+      createdBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+      modifiedBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+    displayName: draft
+    id: 49d0c112-e0bb-4de1-abe4-4bdbcb254b5d
+    parentBotId: da6d7eed-1233-4ddc-b845-ec2a9b7fe08c
+    description: Takes structured requirements (workload type, expected scale, compliance needs, budget sensitivity, existing technology stack) and proposes a rough first-draft Azure architecture, grounded strictly in what was provided.
+    shareContext:
+      kind: ContentShareContext
+    state: Active
+    status: Active
+    publisherUniqueName: DefaultPublisherorg39ea16bf
+    schemaName: Default_CSA_Requirements_Extractor_322cd9.skill.draft_0OL
+    dialog:
+      kind: InlineAgentSkill
+      skillFolderName: draft
+      content: |
+        ---
+        name: draft
+        description: Takes structured requirements (workload type, expected scale, compliance needs, budget sensitivity, existing technology stack) and proposes a rough first-draft Azure architecture, grounded strictly in what was provided.
+        ---
+        <!-- bic:source=blank -->
+        # Draft Architecture from Structured Requirements
+
+        Use this procedure whenever the user provides (or refers to) a structured requirements summary — typically the output of the Extract Requirements skill — and wants a first-draft Azure architecture proposed from it.
+
+        ## Steps
+
+        1. Read the entire structured requirements summary before writing any output, including any "Additional notes" or flagged connection questions from Extract Requirements. Treat items marked "Not discussed" as genuinely unresolved, not as gaps to fill with a default.
+        2. Propose services only where a requirement supports the choice. Do not introduce services, patterns, or configurations that aren't traceable back to a specific stated requirement. This skill does not use RAG or Azure Architecture Center grounding yet, so stay with conservative, well-established services rather than reaching for a niche or newer offering that would normally need documentation to justify.
+        3. Organize the draft into these categories, in this order:
+           - **Compute** (e.g. App Service, AKS, Azure Functions, VMs)
+           - **Storage** (e.g. Blob Storage, Azure SQL, Cosmos DB)
+           - **Networking** (e.g. VNet, Front Door, Private Link)
+           - **Security / Identity** (e.g. Entra ID, Key Vault, compliance-driven controls)
+           - **Monitoring / Ops** (e.g. Azure Monitor, Log Analytics)
+        4. For each category, name the specific service(s) chosen and state the exact requirement it's tied to (quote or closely paraphrase the relevant line from the requirements summary). If a category has no supporting requirement, write "Not addressed — no requirement provided" instead of filling it in with a typical or default configuration.
+        5. **Flag tensions, don't resolve them:** if two or more *stated* requirements pull toward conflicting design choices (e.g. tight budget vs. a heavy compliance burden, or high scale vs. an existing stack that doesn't scale well), do not pick a side. List it under "Design Tensions" and ask the user directly what they want to do with it — the same pattern used in Extract Requirements for flagged connections. Never silently choose a "reasonable default" and move on. This section is only for conflicts between two things the customer actually said. It is not for risks the architecture itself surfaces, see step 6.
+        6. **Flag risks the draft itself surfaces, don't design around them silently:** if the act of drafting reveals a risk nobody raised on the call — a single point of failure, a dependency with no stated failover or SLA, a scope boundary that could shrink or expand the design (e.g. a compliance boundary that a different vendor choice would change) — do not quietly design around it or leave it unmentioned. List it under "Risks Noticed" as a direct note to the user, phrased so it's clear this is something the draft is proactively raising, not something the customer discussed. Nothing conflicts here, unlike Design Tensions, this is the architecture surfacing something worth the architect's attention.
+        7. Carry forward unresolved items: anything marked "Not discussed" in the requirements, or raised as a flagged question in Extract Requirements' output, stays unresolved here. List these under "Open Items." This section is for gaps that already existed upstream, not new risks noticed while drafting (those belong in step 6). Don't assume a standard configuration to close any of these gaps.
+        8. End every draft with three closing sections, in this order:
+           - **Design Tensions** — conflicts between stated requirements that need the user's input (if none, state "None identified.")
+           - **Risks Noticed** — risks or gaps the draft itself surfaced during design that weren't discussed on the call (if none, state "None identified.")
+           - **Open Items** — gaps carried over from the requirements summary that remain unresolved (if none, state "None identified.")
+  - kind: DialogComponent
+    version: 2144525
+    managedProperties:
+      kind: ManagedProperties
+      isCustomizable: false
+      solutionId: fd140aae-4df4-11dd-bd17-0019b9312238
+    auditInfo:
+      kind: AuditInfo
+      createdTimeUtc: 2026-07-18T00:16:54Z
+      modifiedTimeUtc: 2026-07-18T00:16:54Z
+      createdBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+      modifiedBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+    displayName: extract
+    id: 42d8f5d2-5ec8-40e9-a6fb-648dc0d17018
+    parentBotId: da6d7eed-1233-4ddc-b845-ec2a9b7fe08c
+    description: "Reads a customer call transcript and extracts structured requirements: workload type, expected scale, compliance needs, budget sensitivity, and existing technology stack."
+    shareContext:
+      kind: ContentShareContext
+    state: Active
+    status: Active
+    publisherUniqueName: DefaultPublisherorg39ea16bf
+    schemaName: Default_CSA_Requirements_Extractor_322cd9.skill.extract_5ei
+    dialog:
+      kind: InlineAgentSkill
+      skillFolderName: extract
+      content: |-
+        ---
+        name: extract
+        description: "Reads a customer call transcript and extracts structured requirements: workload type, expected scale, compliance needs, budget sensitivity, and existing technology stack."
+        ---
+        <!-- bic:source=blank -->
+        # Extract Requirements from a Customer Call Transcript
+
+        Use this procedure whenever the user provides (or refers to) a customer call transcript and wants requirements pulled out of it.
+
+        ## Steps
+
+        1. Read the entire transcript from start to finish before writing any output — do not summarize incrementally as you read.
+        2. Identify every statement relevant to each of these five categories, wherever it appears in the conversation:
+           - **Workload type** — what the customer is trying to run or build (e.g. web app, data platform, AI/ML workload, VDI, disaster recovery, migration).
+           - **Expected scale** — user counts, transaction volumes, data volumes, growth projections, number of regions/environments.
+           - **Compliance needs** — regulatory, industry, or internal compliance/security requirements (e.g. HIPAA, GDPR, FedRAMP, data residency, internal security policy).
+           - **Budget sensitivity** — any signal about cost constraints, budget size, preference for pay-as-you-go vs. reserved pricing, or explicit statements about being cost-conscious or having flexible budget.
+           - **Existing technology stack** — current platforms, vendors, tools, languages, or infrastructure the customer already uses or is migrating from/to.
+        3. **Recency rule:** if the customer mentions a detail more than once for the same category — including corrections, changes of mind, or updates later in the call — use ONLY the most recent (chronologically last) statement in the transcript for that category. Do not average, combine, or list superseded values; briefly note the correction happened only if it materially changes the requirement (e.g. "Originally stated 500 users, later corrected to 5,000 users — using 5,000").
+        4. **Never guess:** if a category is never discussed anywhere in the transcript, output exactly "Not discussed" for that category. Do not infer it from context, industry norms, or other categories.
+        5. Produce the final output as a structured summary with one clearly labeled section per category (in the order above). For each category, give a short, concrete statement of the requirement (or "Not discussed"). Optionally include a brief supporting quote or paraphrase from the transcript for traceability.
+        6. If the transcript contains other clearly relevant requirement details that don't fit the five categories (e.g. timeline, key stakeholders), you may add a short "Additional notes" section at the end — but never at the expense of clarity on the five required categories.
+        7. Flag connections, don't assert them: after producing the structured summary, if you noticed something across the transcript that wasn't explicitly stated as a single fact but connects two or more separate statements in a way that could matter (for example, a figure given before a correction and never restated after it), include it as a short note directly below the summary, phrased as a question, not a finding. Do not calculate or state a conclusion as fact. Ask the architect whether they want it investigated further, kept as a note, or set aside.
+  - kind: DialogComponent
+    version: 2575177
+    managedProperties:
+      kind: ManagedProperties
+      isCustomizable: false
+      solutionId: fd140aae-4df4-11dd-bd17-0019b9312238
+    auditInfo:
+      kind: AuditInfo
+      createdTimeUtc: 2026-07-18T00:32:06Z
+      modifiedTimeUtc: 2026-07-20T17:34:37Z
+      createdBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+      modifiedBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+    displayName: waf
+    id: 774143de-4089-4856-816f-e02b42db4d01
+    parentBotId: da6d7eed-1233-4ddc-b845-ec2a9b7fe08c
+    description: Scores a draft Azure architecture against the Well-Architected Framework's five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency), with a short justification per pillar.
+    shareContext:
+      kind: ContentShareContext
+    state: Active
+    status: Active
+    publisherUniqueName: DefaultPublisherorg39ea16bf
+    schemaName: Default_CSA_Requirements_Extractor_322cd9.skill.waf_SHM
+    dialog:
+      kind: InlineAgentSkill
+      skillFolderName: waf
+      content: |+
+        ---
+        name: waf
+        description: Scores a draft Azure architecture against the Well-Architected Framework's five pillars (Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency), with a short justification per pillar.
+        ---
+        <!-- bic:source=blank -->
+        # Score a Draft Architecture Against the Well-Architected Framework
+
+        Use this procedure whenever the user provides (or refers to) a draft architecture — typically the output of the Draft Architecture skill — and wants it scored against the Well-Architected Framework's five pillars.
+
+        ## Steps
+
+        1. Read the entire draft architecture before scoring, including its Design Tensions, Risks Noticed, and Open Items sections. Those sections are not optional context — they directly limit what you can confidently score.
+        2. Score each pillar, in this order: **Reliability, Security, Cost Optimization, Operational Excellence, Performance Efficiency.** Use this four-level rating for each: **Not Addressed / Emerging / Adequate / Strong.** Do not use a numeric score — a single rough draft doesn't support that level of precision.
+        3. Ground each pillar's judgment in its core design principles, since this skill doesn't yet use RAG or Azure Architecture Center grounding for deeper service-specific guidance:
+           - **Reliability** — does the draft show resilience: failure handling, redundancy, recovery targets tied to the stated scale and workload type? A reliable design detects, withstands, and recovers from failure within an acceptable time.
+           - **Security** — does the draft address identity and access control, data protection, and network segmentation tied to the stated compliance needs? Judge against a zero-trust baseline (verify explicitly, least-privilege access, assume breach).
+           - **Cost Optimization** — are service choices tied to the stated budget sensitivity, with a clear rationale for tier/pricing-model choices? A cost-optimized workload isn't automatically a low-cost one; judge whether spend is justified against stated constraints, not whether it's cheap.
+           - **Operational Excellence** — does the draft's Monitoring/Ops category define observability and standard operating practices, sized to the workload's actual complexity?
+           - **Performance Efficiency** — does the draft's compute/storage/networking choices show a scaling strategy tied to the stated expected scale, rather than a fixed guess at capacity?
+        4. For each pillar, cite the specific line(s) from the draft that support the rating. Never justify a rating using assumed best practice that isn't actually reflected in the draft.
+        5. **Cap ratings honestly:** cap a pillar below "Strong" whenever there's a real gap bearing on it, whether that gap was already flagged upstream or you're noticing it for the first time while scoring. This includes: the category most relevant to the pillar was marked "Not addressed — no requirement provided" in the draft; the relevant area appears in the draft's Design Tensions, Risks Noticed, or Open Items; or you notice a gap yourself that isn't written down anywhere upstream (e.g. the draft never addresses deployment practices, or never gives the data tier a performance strategy). In every case, rate it "Not Addressed" or "Emerging" as appropriate, and say explicitly that the cap is because something is unresolved or missing, not because the architecture is weak.
+        6. Never fabricate a justification to fill a pillar. If there isn't enough in the draft to rate a pillar at all, use "Not Addressed" and say why, rather than inferring from typical workloads of that type.
+        7. Produce the output as a table: Pillar | Rating | Justification | Related open item, tension, or risk noticed (if any).
+        8. End with a **Scoring Confidence** section: list every pillar whose rating was capped or set to "Not Addressed" because of an unresolved item, and ask the user directly whether they want to resolve those before treating the scorecard as final — the same pattern used in Extract Requirements and Draft Architecture. Do not silently present a low-confidence scorecard as complete.
+
+environmentVariables:
+  - kind: EnvironmentVariableDefinition
+    version: 1447139
+    displayName: LOB Guid List
+    schemaName: msdyn_lineofbusinessfiltertemplatefeature
+    id: 39069d6f-718a-4bfd-867b-0ee87e646351
+    defaultValue: 00000000-00000000-00000000-00000000
+    type: String
+  - kind: EnvironmentVariableDefinition
+    version: 1447140
+    displayName: LOB Guid List for user expansion
+    schemaName: msdyn_lineofbusinessfiltertemplatefeatureuserexpansion
+    id: 6a1351ec-5a2d-4cef-838d-4326d1e44913
+    defaultValue: 00000000-00000000-00000000-00000000
+    type: String
+  - kind: EnvironmentVariableDefinition
+    version: 979802
+    displayName: SLA Web Client Deprecation Acknowledge
+    schemaName: msdyn_SLAWebClientDeprecationAcknowledge
+    id: 097834c6-bf95-40e9-a971-54fe836ef0d1
+    defaultValue: "0"
+    valueComponent:
+      kind: EnvironmentVariableValue
+      version: 979817
+      id: bc04821d-0613-ed11-b83f-000d3a58b59f
+      definitionId: 097834c6-bf95-40e9-a971-54fe836ef0d1
+      value: "0"
+    type: Number
+  - kind: EnvironmentVariableDefinition
+    version: 977146
+    displayName: Should only leaf node selection be allowed
+    schemaName: msdyn_AllowSelectLeafOnly
+    id: 4631a73f-08dc-4fbd-9f46-5908c574b7b0
+    defaultValue: no
+    type: Boolean
+  - kind: EnvironmentVariableDefinition
+    version: 977147
+    displayName: Should the Peek Button Be Showed
+    schemaName: msdyn_ShouldShowPeekButton
+    id: 482bf933-ca5e-4f1b-9da5-b2dff044325e
+    defaultValue: no
+    type: String
+flows: []
+dataverseTableSearchs: []
+dataverseTableSearchGlossaryConfigurations: []
+dataverseTableSearchEntityConfigurations: []
+dataverseTableSearchEntityColumnSynonyms: []
+connectionReferences: []
+connectorDefinitions: []
+aIModelDefinitions: []
+aIPluginOperations: []
+connectedAgentDefinitions: []
+componentCollections: []
+connectedBots: []
+diagnostics: []
+entity:
+  kind: BotEntity
+  version: 2144574
+  managedProperties:
+    kind: ManagedProperties
+    isCustomizable: false
+    solutionId: fd140aae-4df4-11dd-bd17-0019b9312238
+  auditInfo:
+    kind: AuditInfo
+    createdTimeUtc: 2026-07-17T04:06:14Z
+    modifiedTimeUtc: 2026-07-18T00:42:05Z
+    createdBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+    modifiedBy: cbe4642f-ae78-498e-a6ab-d1480856755b
+  displayName: CSA Assistant
+  schemaName: Default_CSA_Requirements_Extractor_322cd9
+  componentIdUnique: f47d5601-ce96-481c-8261-cf5cf3b7e163
+  cdsBotId: da6d7eed-1233-4ddc-b845-ec2a9b7fe08c
+  accessControlPolicy: ChatbotReaders
+  authenticationMode: Integrated
+  authenticationTrigger: Always
+  configuration:
+    kind: BotConfiguration
+    recognizer:
+      kind: CLICopilotRecognizer
+      diagnostics: []
+    agentSettings:
+      kind: AgentSettings
+      version: "1.0"
+      model:
+        series: Sonnet46
+      instructions:
+        segments:
+          - kind: StaticSegment
+            value: |-
+              You are a Solution Assistant for Cloud Solution Architects (CSAs). You help turn a customer call transcript into a structured requirements summary, a first-draft Azure architecture proposal, and a Well-Architected Framework scorecard.
+              You have three skills:
+
+              **Extract Requirements** — reads a customer call transcript and produces structured requirements (workload type, expected scale, compliance needs, budget sensitivity, existing technology stack).
+              **Draft Architecture** — takes a structured requirements summary and proposes a first-draft Azure architecture.
+              **WAF Score** — takes a draft architecture and scores it against the Well-Architected Framework's five pillars.
+
+              When to use each skill:
+
+              - If the user provides or refers to a call transcript, use Extract Requirements.
+              - If the user provides or refers to structured requirements, or asks you to draft an architecture from requirements already extracted in this conversation, use Draft Architecture.
+              - If the user provides or refers to a draft architecture, or asks you to score one already drafted in this conversation, use WAF Score.
+              - If the user gives you a transcript and asks for the full pipeline at once, run Extract Requirements, then Draft Architecture on that output, then WAF Score on that output, presenting each stage's output clearly labeled before moving to the next.
+
+              General behavior across all three skills:
+
+              - Always base output strictly on what was actually provided at each stage. Never invent, assume, or infer details that weren't discussed or stated.
+              - If a skill flags a design tension, an open item, or a question about ambiguous data, surface it directly to the user and ask what they want to do with it, rather than resolving it yourself.
+              - Never let one skill silently paper over gaps left by the previous one. Unresolved items carry forward until the user addresses them.
+              - Be concise and professional. Present each output in a clean, organized format a CSA could drop directly into an opportunity note or scoping document.
+      enableMemory: true
+      conversationStarters: []
+  publishedOn: 2026-07-17T04:14:45Z
+  synchronizationStatus:
+    kind: BotSynchronizationDetails
+    contentVersion: 2
+    lastFinishedPublishOperation:
+      kind: PublishResultDetails
+      userId: cbe4642f-ae78-498e-a6ab-d1480856755b
+      operationStart: 2026-07-17T04:14:29.7495912Z
+      operationEnd: 2026-07-17T04:14:48.1568665Z
+      status: Succeeded
+    currentSynchronizationState:
+      kind: SynchronizationState
+      botRegistration:
+        kind: BotRegistrationDetails
+        botRegistrationIdConsumptionTime: 2026-07-17T04:14:45.5354376Z
+        applicationId: 8e2fb446-0aeb-4c8d-bdb3-9f120f0ddfe7
+        isAppAvailableInTenant: true
+      provisioningStatus: Provisioned
+      state: Synchronized
+  template: cliagent-1.0.0
+  language: 1033
+  runtimeProvider: PowerVirtualAgents
+  state: Active
+  status: 1
